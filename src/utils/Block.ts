@@ -136,7 +136,7 @@ class Block {
     const contextAndStubs = { ...context };
 
     Object.entries(this.children).forEach(([name, component]) => {
-      contextAndStubs[name] = `<div data-id="${component.id}" />`;
+      contextAndStubs[name] = `<div data-id="${component.id}"></div>`;
     });
 
     const html = template(contextAndStubs);
