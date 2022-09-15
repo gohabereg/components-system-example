@@ -1,13 +1,46 @@
-import { HomePage } from './pages/Home';
-import { Button } from './components/Button';
+import { LoginPage } from './pages/Login';
+import { RegisterPage } from './pages/Register';
+import Router from './utils/Router';
+import { ProfilePage } from './pages/Profile';
+import store from './utils/Store';
+import AuthController from './controllers/AuthController';
 
-window.addEventListener('DOMContentLoaded', () => {
-  const root = document.querySelector('#app')!;
+enum Routes {
+  Index = '/',
+  Register = '/register',
+  Profile = '/profile'
+}
 
-  const homePage = new HomePage({ title: 'Home page' });
+window.addEventListener('DOMContentLoaded', async () => {
+  Router
+    .use(Routes.Index, LoginPage)
+    .use(Routes.Register, RegisterPage)
+    .use(Routes.Profile, ProfilePage)
 
-  root.append(homePage.getContent()!);
+  let isProtectedRoute = true;
 
-  homePage.dispatchComponentDidMount();
+  switch (window.location.pathname) {
+    case Routes.Index:
+    case Routes.Register:
+      isProtectedRoute = false;
+      break;
+  }
+
+  try {
+    await AuthController.fetchUser();
+
+    Router.start();
+
+    if (!isProtectedRoute) {
+      Router.go(Routes.Profile)
+    }
+  } catch (e) {
+    Router.start();
+
+    if (isProtectedRoute) {
+      Router.go(Routes.Index);
+    }
+  }
+
 });
 
