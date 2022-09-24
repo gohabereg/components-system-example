@@ -3,12 +3,20 @@ import template from './profile.hbs';
 import { withStore } from '../../utils/Store';
 import AuthController from '../../controllers/AuthController';
 import { Button } from '../../components/Button';
+import { User } from '../../api/AuthAPI';
+import { ProfileField } from '../../components/ProfileField';
 
-class ProfilePageBase extends Block {
+interface ProfileProps extends User {}
+
+const userFields = ['id', 'first_name', 'second_name', 'display_name', 'login', 'avatar', 'email', 'phone'] as Array<keyof ProfileProps>;
+
+class ProfilePageBase extends Block<ProfileProps> {
   init() {
-    AuthController.fetchUser();
+    this.children.fields = userFields.map(name => {
+      return new ProfileField({ name, value: this.props[name] });
+    });
 
-    this.children.button = new Button({
+    this.children.logoutButton = new Button({
       label: 'Выйти',
       events: {
         click: () => {
@@ -16,6 +24,28 @@ class ProfilePageBase extends Block {
         }
       }
     })
+  }
+
+  protected componentDidUpdate(oldProps: ProfileProps, newProps: ProfileProps): boolean {
+    /**
+     * Обновляем детей
+     */
+    (this.children.fields as ProfileField[]).forEach((field, i) => {
+      field.setProps({  value: newProps[userFields[i]] });
+    });
+
+    /**
+     * Другой вариант — просто заново создать всех детей. Но тогда метод должен возвращать true, чтобы новые дети отрендерились
+     *
+     * this.children.fields = userFields.map(name => {
+     *   return new ProfileField({ name, value: newProps[name] });
+     * });
+     */
+
+    /**
+     * Так как мы обновили детей, этот компонент не обязательно рендерить
+     */
+    return false;
   }
 
   render() {

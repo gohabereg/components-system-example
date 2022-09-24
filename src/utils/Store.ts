@@ -1,9 +1,14 @@
 import { set } from './helpers';
 import { EventBus } from './EventBus';
 import Block from './Block';
+import { User } from '../api/AuthAPI';
 
 export enum StoreEvents {
   Updated = 'updated'
+}
+
+interface State {
+  user: User;
 }
 
 export class Store extends EventBus {
@@ -22,16 +27,16 @@ export class Store extends EventBus {
 
 const store = new Store();
 
-export function withStore(mapStateToProps: (state: any) => any) {
+// @ts-ignore
+window.store = store;
 
-  return function wrap(Component: typeof Block){
-    let previousState: any;
-
+export function withStore<SP>(mapStateToProps: (state: State) => SP) {
+  return function wrap<P>(Component: typeof Block<SP & P>){
 
     return class WithStore extends Component {
 
-      constructor(props: any) {
-        previousState = mapStateToProps(store.getState());
+      constructor(props: P) {
+        let previousState = mapStateToProps(store.getState());
 
         super({ ...props, ...previousState });
 
@@ -42,11 +47,12 @@ export function withStore(mapStateToProps: (state: any) => any) {
 
           this.setProps({ ...stateProps });
         });
+
       }
+
     }
 
   }
-
 }
 
 export default store;

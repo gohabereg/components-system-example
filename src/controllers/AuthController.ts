@@ -13,6 +13,8 @@ export class AuthController {
     try {
       await this.api.signin(data);
 
+      await this.fetchUser();
+
       router.go('/profile');
     } catch (e: any) {
       console.error(e);
