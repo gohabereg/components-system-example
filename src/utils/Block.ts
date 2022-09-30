@@ -42,7 +42,7 @@ class Block<P extends Record<string, any> = any> {
     const children: Record<string, Block | Block[]> = {};
 
     Object.entries(childrenAndProps).forEach(([key, value]) => {
-      if (Array.isArray(value) && value.every(v => v instanceof Block)) {
+      if (Array.isArray(value) && value.length > 0 && value.every(v => v instanceof Block)) {
         children[key as string] = value;
       } else if (value instanceof Block) {
         children[key as string] = value;

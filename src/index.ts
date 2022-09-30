@@ -2,13 +2,14 @@ import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
 import Router from './utils/Router';
 import { ProfilePage } from './pages/Profile';
-import store from './utils/Store';
 import AuthController from './controllers/AuthController';
+import { MessengerPage } from './pages/Messenger';
 
 enum Routes {
   Index = '/',
   Register = '/register',
-  Profile = '/profile'
+  Profile = '/profile',
+  Messenger = '/messenger',
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -16,6 +17,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     .use(Routes.Index, LoginPage)
     .use(Routes.Register, RegisterPage)
     .use(Routes.Profile, ProfilePage)
+    .use(Routes.Messenger, MessengerPage)
 
   let isProtectedRoute = true;
 

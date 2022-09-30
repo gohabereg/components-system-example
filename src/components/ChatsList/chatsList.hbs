@@ -1,0 +1,10 @@
+<aside class="{{ styles.chats-list }}">
+{{#if isLoaded }}
+    {{#each chats}}
+        {{{this}}}
+    {{/each}}
+    {{{profileLink}}}
+{{else}}
+  Loading...
+{{/if}}
+</aside>
