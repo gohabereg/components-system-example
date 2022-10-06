@@ -1,6 +1,6 @@
 import Block from './Block';
 
-interface BlockConstructable<P = any> {
+export interface BlockConstructable<P = any> {
   new(props: P): Block<P>;
 }
 
@@ -49,7 +49,7 @@ class Route {
   }
 }
 
-class Router {
+export class Router {
   private static __instance: Router;
   private routes: Route[] = [];
   private currentRoute: Route | null = null;
@@ -70,6 +70,20 @@ class Router {
     this.routes.push(route);
 
     return this;
+  }
+
+  public go(pathname: string) {
+    this.history.pushState({}, '', pathname);
+
+    this._onRoute(pathname);
+  }
+
+  public back() {
+    this.history.back();
+  }
+
+  public forward() {
+    this.history.forward();
   }
 
   public start() {
@@ -96,20 +110,6 @@ class Router {
     this.currentRoute = route;
 
     route.render();
-  }
-
-  public go(pathname: string) {
-    this.history.pushState({}, '', pathname);
-
-    this._onRoute(pathname);
-  }
-
-  public back() {
-    this.history.back();
-  }
-
-  public forward() {
-    this.history.forward();
   }
 
   private getRoute(pathname: string) {
