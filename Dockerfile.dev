@@ -8,8 +8,6 @@ RUN yarn install
 
 COPY . .
 
-RUN yarn build
+EXPOSE 1234
 
-EXPOSE 3000
-
-CMD ["node", "./server.js"]
+CMD ["yarn", "dev"]
