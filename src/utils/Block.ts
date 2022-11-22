@@ -1,19 +1,28 @@
-import { EventBus } from "./EventBus";
+import { EventBus } from './EventBus';
 import { nanoid } from 'nanoid';
 
+type BlockEvents<P = any> = {
+  init: [];
+  'flow:component-did-mount': [];
+  'flow:component-did-update': [P, P];
+  'flow:render': [];
+}
+
+type Props<P extends Record<string, unknown> = any> = { events?: Record<string, () => void> } & P;
+
 // Нельзя создавать экземпляр данного класса
-class Block {
+class Block<P extends Record<string, unknown> = any> {
   static EVENTS = {
-    INIT: "init",
-    FLOW_CDM: "flow:component-did-mount",
-    FLOW_CDU: "flow:component-did-update",
-    FLOW_RENDER: "flow:render"
-  };
+    INIT: 'init',
+    FLOW_CDM: 'flow:component-did-mount',
+    FLOW_CDU: 'flow:component-did-update',
+    FLOW_RENDER: 'flow:render'
+  } as const;
 
   public id = nanoid(6);
-  protected props: any;
+  protected props: Props<P>;
   public children: Record<string, Block>;
-  private eventBus: () => EventBus;
+  private eventBus: () => EventBus<BlockEvents<Props<P>>>;
   private _element: HTMLElement | null = null;
   private _meta: { tagName: string; props: any; };
 
@@ -23,10 +32,10 @@ class Block {
    *
    * @returns {void}
    */
-  constructor(tagName = "div", propsWithChildren: any = {}) {
-    const eventBus = new EventBus();
+  protected constructor(tagName = 'div', propsWithChildren: Props<P> = {} as Props<P>) {
+    const eventBus = new EventBus<BlockEvents<Props<P>>>();
 
-    const { props, children } = this._getChildrenAndProps(propsWithChildren);
+    const {props, children} = this._getChildrenAndProps(propsWithChildren);
 
     this._meta = {
       tagName,
@@ -43,8 +52,8 @@ class Block {
     eventBus.emit(Block.EVENTS.INIT);
   }
 
-  _getChildrenAndProps(childrenAndProps: any) {
-    const props: Record<string, any> = {};
+  _getChildrenAndProps(childrenAndProps: Props<P>): { props: Props<P>, children: Record<string, Block> } {
+    const props = {} as Record<string, unknown>;
     const children: Record<string, Block> = {};
 
     Object.entries(childrenAndProps).forEach(([key, value]) => {
@@ -55,18 +64,18 @@ class Block {
       }
     });
 
-    return { props, children };
+    return {props: props as Props<P>, children};
   }
 
   _addEvents() {
-    const {events = {}} = this.props as { events: Record<string, () =>void> };
+    const {events = {}} = this.props;
 
     Object.keys(events).forEach(eventName => {
       this._element?.addEventListener(eventName, events[eventName]);
     });
   }
 
-  _registerEvents(eventBus: EventBus) {
+  _registerEvents(eventBus: EventBus<BlockEvents>) {
     eventBus.on(Block.EVENTS.INIT, this._init.bind(this));
     eventBus.on(Block.EVENTS.FLOW_CDM, this._componentDidMount.bind(this));
     eventBus.on(Block.EVENTS.FLOW_CDU, this._componentDidUpdate.bind(this));
@@ -74,7 +83,7 @@ class Block {
   }
 
   _createResources() {
-    const { tagName } = this._meta;
+    const {tagName} = this._meta;
     this._element = this._createDocumentElement(tagName);
   }
 
@@ -86,13 +95,14 @@ class Block {
     this.eventBus().emit(Block.EVENTS.FLOW_RENDER);
   }
 
-  protected init() {}
+  protected init() {};
 
   _componentDidMount() {
     this.componentDidMount();
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+  }
 
   public dispatchComponentDidMount() {
     this.eventBus().emit(Block.EVENTS.FLOW_CDM);
@@ -100,17 +110,17 @@ class Block {
     Object.values(this.children).forEach(child => child.dispatchComponentDidMount());
   }
 
-  private _componentDidUpdate(oldProps: any, newProps: any) {
+  private _componentDidUpdate(oldProps: Props<P>, newProps: Props<P>) {
     if (this.componentDidUpdate(oldProps, newProps)) {
       this.eventBus().emit(Block.EVENTS.FLOW_RENDER);
     }
   }
 
-  protected componentDidUpdate(oldProps: any, newProps: any) {
+  protected componentDidUpdate(oldProps: Props<P>, newProps: Props<P>) {
     return true;
   }
 
-  setProps = (nextProps: any) => {
+  setProps = (nextProps: Partial<Props<P>>) => {
     if (!nextProps) {
       return;
     }
@@ -133,7 +143,7 @@ class Block {
   }
 
   protected compile(template: (context: any) => string, context: any) {
-    const contextAndStubs = { ...context };
+    const contextAndStubs = {...context};
 
     Object.entries(this.children).forEach(([name, component]) => {
       contextAndStubs[name] = `<div data-id="${component.id}"></div>`;
@@ -169,27 +179,28 @@ class Block {
     return this.element;
   }
 
-  _makePropsProxy(props: any) {
+  _makePropsProxy(props: Props<P>) {
     // Ещё один способ передачи this, но он больше не применяется с приходом ES6+
     const self = this;
 
     return new Proxy(props, {
       get(target, prop) {
-        const value = target[prop];
-        return typeof value === "function" ? value.bind(target) : value;
+        const value = target[prop as string];
+        return typeof value === 'function' ? value.bind(target) : value;
       },
       set(target, prop, value) {
-        const oldTarget = { ...target }
+        const oldTarget = {...target}
 
-        target[prop] = value;
+        target[prop as keyof Props<P>] = value;
 
         // Запускаем обновление компоненты
         // Плохой cloneDeep, в следующей итерации нужно заставлять добавлять cloneDeep им самим
         self.eventBus().emit(Block.EVENTS.FLOW_CDU, oldTarget, target);
+
         return true;
       },
       deleteProperty() {
-        throw new Error("Нет доступа");
+        throw new Error('Нет доступа');
       }
     });
   }
@@ -200,11 +211,11 @@ class Block {
   }
 
   show() {
-    this.getContent()!.style.display = "block";
+    this.getContent()!.style.display = 'block';
   }
 
   hide() {
-    this.getContent()!.style.display = "none";
+    this.getContent()!.style.display = 'none';
   }
 }
 
