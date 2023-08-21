@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "parcel ./src/index.html"
+    "dev": "vite"
   },
   "devDependencies": {
-    "@anikin/parcel-transformer-handlebars-precompile": "^1.0.1",
-    "parcel": "^2.7.0",
-    "parcel-transformer-pug-precompile": "^1.0.6",
-    "typescript": "^4.7.4"
+    "@types/node": "^20.5.1",
+    "typescript": "^4.7.4",
+    "vite": "^4.4.9"
   },
   "dependencies": {
     "handlebars": "^4.7.7",

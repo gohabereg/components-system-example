@@ -1,10 +1,9 @@
-<div>
-    <h1>Home page</h1>
+export default `<div>
+    <h1>Login page</h1>
     {{#Card}}
-        {{{Button ref="button" label=buttonLabel onClick=onButtonClick}}}
         {{#each buttons}}
             {{{Button label=this.label type=../type onClick=this.onClick}}}
         {{/each}}
     {{/Card}}
-</div>
+</div>`
 

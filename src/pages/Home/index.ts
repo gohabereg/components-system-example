@@ -1,22 +1,23 @@
 import Block from '../../utils/Block';
 import template from './home.hbs';
-import { Button } from '../../components/Button';
+import {render} from "../../utils/render";
 
-interface HomePageProps {
-  title: string;
-}
 
 export class HomePage extends Block {
-  constructor(props: HomePageProps) {
-    super('div', props);
-  }
+  constructor() {
+    super({
+      type: 'button',
 
-  init() {
-    this.children.button = new Button({
-      label: 'Click me',
-      events: {
-        click: () => console.log('clicked'),
-      },
+      buttons: [
+        {
+          label: 'Login', onClick: () => {
+            render('login');
+          }
+        },
+        {
+          label: 'Button 2'
+        },
+      ]
     });
   }
 

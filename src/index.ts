@@ -1,13 +1,13 @@
-import { HomePage } from './pages/Home';
-import { Button } from './components/Button';
+import {HomePage} from './pages/Home';
+import {Button} from './components/Button';
+import {registerComponent} from "./utils/resgiterComponent";
+import Card from "./components/Card";
+import {render} from "./utils/render";
+
+registerComponent('Button', Button);
+registerComponent('Card', Card);
 
 window.addEventListener('DOMContentLoaded', () => {
-  const root = document.querySelector('#app')!;
-
-  const homePage = new HomePage({ title: 'Home page' });
-
-  root.append(homePage.getContent()!);
-
-  homePage.dispatchComponentDidMount();
+  render('home')
 });
 

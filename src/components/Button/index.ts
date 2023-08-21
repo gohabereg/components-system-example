@@ -3,6 +3,8 @@ import template from './button.hbs';
 
 interface ButtonProps {
   label: string;
+  type?: 'submit' | 'button',
+  onClick?: () => void;
   events: {
     click: () => void;
   };
@@ -10,7 +12,12 @@ interface ButtonProps {
 
 export class Button extends Block {
   constructor(props: ButtonProps) {
-    super('button', props);
+    super({
+      ...props,
+      events: {
+        click: props.onClick
+      }
+    });
   }
 
   render() {

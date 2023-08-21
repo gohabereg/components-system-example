@@ -1,5 +1,5 @@
-import { EventBus } from "./EventBus";
-import { nanoid } from 'nanoid';
+import {EventBus} from "./EventBus";
+import {nanoid} from 'nanoid';
 
 // Нельзя создавать экземпляр данного класса
 class Block {
@@ -12,10 +12,11 @@ class Block {
 
   public id = nanoid(6);
   protected props: any;
+  protected refs: Record<string, Block> = {};
   public children: Record<string, Block>;
   private eventBus: () => EventBus;
   private _element: HTMLElement | null = null;
-  private _meta: { tagName: string; props: any; };
+  private _meta: { props: any; };
 
   /** JSDoc
    * @param {string} tagName
@@ -23,13 +24,12 @@ class Block {
    *
    * @returns {void}
    */
-  constructor(tagName = "div", propsWithChildren: any = {}) {
+  constructor(propsWithChildren: any = {}) {
     const eventBus = new EventBus();
 
-    const { props, children } = this._getChildrenAndProps(propsWithChildren);
+    const {props, children} = this._getChildrenAndProps(propsWithChildren);
 
     this._meta = {
-      tagName,
       props
     };
 
@@ -55,11 +55,11 @@ class Block {
       }
     });
 
-    return { props, children };
+    return {props, children};
   }
 
   _addEvents() {
-    const {events = {}} = this.props as { events: Record<string, () =>void> };
+    const {events = {}} = this.props as { events: Record<string, () => void> };
 
     Object.keys(events).forEach(eventName => {
       this._element?.addEventListener(eventName, events[eventName]);
@@ -73,26 +73,21 @@ class Block {
     eventBus.on(Block.EVENTS.FLOW_RENDER, this._render.bind(this));
   }
 
-  _createResources() {
-    const { tagName } = this._meta;
-    this._element = this._createDocumentElement(tagName);
-  }
-
   private _init() {
-    this._createResources();
-
     this.init();
 
     this.eventBus().emit(Block.EVENTS.FLOW_RENDER);
   }
 
-  protected init() {}
+  protected init() {
+  }
 
   _componentDidMount() {
     this.componentDidMount();
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+  }
 
   public dispatchComponentDidMount() {
     this.eventBus().emit(Block.EVENTS.FLOW_CDM);
@@ -125,19 +120,19 @@ class Block {
   private _render() {
     const fragment = this.render();
 
-    this._element!.innerHTML = '';
+    const newElement = fragment.firstElementChild as HTMLElement;
 
-    this._element!.append(fragment);
+    if (this._element) {
+      this._element.replaceWith(newElement);
+    }
+
+    this._element = newElement;
 
     this._addEvents();
   }
 
   protected compile(template: (context: any) => string, context: any) {
-    const contextAndStubs = { ...context };
-
-    Object.entries(this.children).forEach(([name, component]) => {
-      contextAndStubs[name] = `<div data-id="${component.id}"></div>`;
-    });
+    const contextAndStubs = {...context, __refs: this.refs};
 
     const html = template(contextAndStubs);
 
@@ -145,17 +140,8 @@ class Block {
 
     temp.innerHTML = html;
 
-    Object.entries(this.children).forEach(([_, component]) => {
-      const stub = temp.content.querySelector(`[data-id="${component.id}"]`);
-
-      if (!stub) {
-        return;
-      }
-
-      component.getContent()?.append(...Array.from(stub.childNodes));
-
-      stub.replaceWith(component.getContent()!);
-
+    contextAndStubs.__children?.forEach(({embed}: any) => {
+      embed(temp.content);
     });
 
     return temp.content;
@@ -179,7 +165,7 @@ class Block {
         return typeof value === "function" ? value.bind(target) : value;
       },
       set(target, prop, value) {
-        const oldTarget = { ...target }
+        const oldTarget = {...target}
 
         target[prop] = value;
 
