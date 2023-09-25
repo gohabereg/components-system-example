@@ -1,4 +1,4 @@
-import Router, { BlockConstructable } from './Router'
+import Router, { BlockConstructable } from './Router.ts'
 import { expect } from 'chai';
 import sinon from 'sinon';
 
@@ -14,6 +14,10 @@ describe('Router', () => {
       window.onpopstate({currentTarget: window} as unknown as PopStateEvent);
     }
   }
+
+  beforeEach(() => {
+    Router.reset();
+  });
 
   const getContentFake = sinon.fake.returns(document.createElement('div'));
 

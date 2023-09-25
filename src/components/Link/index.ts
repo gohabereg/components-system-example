@@ -1,5 +1,5 @@
-import Block from '../../utils/Block';
-import { PropsWithRouter, withRouter } from '../../hocs/withRouter';
+import Block from '../../utils/Block.ts';
+import { PropsWithRouter, withRouter } from '../../hocs/withRouter.ts';
 import template from './link.hbs';
 import styles from './styles.module.pcss';
 

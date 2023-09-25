@@ -1,11 +1,12 @@
 import sinon, { SinonFakeXMLHttpRequest, SinonFakeXMLHttpRequestStatic } from 'sinon';
-import HTTPTransport from './HTTPTransport';
+import HTTPTransport from './HTTPTransport.ts';
 import { expect } from 'chai';
+
 
 describe('HTTPTransport', () => {
   let xhr: SinonFakeXMLHttpRequestStatic;
   let instance: HTTPTransport;
-  const requests: SinonFakeXMLHttpRequest[] = [];
+  let requests: SinonFakeXMLHttpRequest[] = [];
 
   beforeEach(() => {
     xhr = sinon.useFakeXMLHttpRequest();
@@ -21,7 +22,7 @@ describe('HTTPTransport', () => {
   });
 
   afterEach(() => {
-    requests.length = 0;
+    requests = [];
   })
 
   it('.get() should send GET request', () => {

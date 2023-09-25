@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { set } from './helpers';
+import { set } from './helpers.ts';
 
 describe('set function', () => {
   const keypath = 'test';

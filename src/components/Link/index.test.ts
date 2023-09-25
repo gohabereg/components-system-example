@@ -1,6 +1,6 @@
-import { Link } from './index';
+import { Link } from './index.ts';
 import { expect } from 'chai';
-import Router from '../../utils/Router';
+import Router from '../../utils/Router.ts';
 import sinon from 'sinon';
 
 describe('Link', () => {
